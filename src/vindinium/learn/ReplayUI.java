@@ -13,9 +13,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.text.DecimalFormat;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import org.apache.log4j.BasicConfigurator;
+import vindinium.bot.ValueBot;
 import vindinium.learn.VindDB.Scenario;
 import vindinium.model.Dir;
 import vindinium.model.GameState;
@@ -26,12 +28,16 @@ public class ReplayUI extends JComponent {
 
   private static final File dir = new File("C:/shit/vind");
   private static final Font font = new Font("Arial", Font.BOLD, 12);
+  private static final DecimalFormat format = new DecimalFormat("#.#");
 
   private final VindDB db = VindDB.get();
 
   private int index = 1;
   private GameState state;
   private int size;
+
+  private ValueBot bot = new ValueBot();
+  private Dir newDir;
 
   public ReplayUI() {
     this(null);
@@ -43,6 +49,7 @@ public class ReplayUI extends JComponent {
       refresh();
     } else {
       this.state = state;
+      newDir = bot.act(state);
     }
   }
 
@@ -59,9 +66,14 @@ public class ReplayUI extends JComponent {
 
   private void paintMove(Graphics3D g) {
     Dir dir = Dir.valueOf(state.json.get("myMove"));
+    drawDir(g, dir, new Color(255, 0, 0, 100));
+    drawDir(g, newDir, new Color(0, 255, 0, 100));
+  }
+
+  private void drawDir(Graphics3D g, Dir dir, Color c) {
     Rect r = new Rect(state.me.x * size, state.me.y * size, size, size);
     r = r.translate(dir.vx * size, dir.vy * size);
-    g.color(new Color(0, 255, 0, 100)).fill(r);
+    g.color(c).fillOval(r.grow(-10, -10));
   }
 
   private void paintGrid(Graphics3D g) {
@@ -90,11 +102,18 @@ public class ReplayUI extends JComponent {
         } else if (tile.type == Type.GOLD) {
           g.color(Color.orange).fill(r);
         }
+        if (bot.safeZoneTiles.contains(tile)) {
+          g.color(Color.green).draw(r.grow(-1, -1));
+        }
         if (tile.hero != null) {
           g.font(font).color(Color.black).text(tile.hero.name, r);
           if (tile.type != Type.GOLD) {
             g.text(tile.hero.life + "", r.moveY(15));
           }
+        }
+        if (tile.type != Type.WOOD) {
+          double value = bot.valueTown.get(tile);
+          g.color(Color.white).text(format.format(value), r.moveY(-10));
         }
       }
     }
@@ -105,6 +124,7 @@ public class ReplayUI extends JComponent {
     Json json = IO.from(file).toJson();
     GameState state = new GameState(json);
     this.state = state;
+    newDir = bot.act(state);
     repaint();
   }
 

@@ -3,8 +3,7 @@ package vindinium.learn;
 import java.util.List;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import vindinium.bot.AI;
-import vindinium.bot.StrategyBot;
+import vindinium.bot.ValueBot;
 import vindinium.learn.VindDB.Scenario;
 import vindinium.model.Dir;
 
@@ -14,29 +13,24 @@ public class BotTester {
 
   private static int BREAKPOINT = 0;
 
-  private final AI ai = new StrategyBot();
-
   private final VindDB db = VindDB.get();
 
   private void run() {
     int successCount = 0;
 
     List<Scenario> scenarios = db.getScenarios();
-    int c = 1;
 
     boolean displayed = false;
 
     for (Scenario s : scenarios) {
-      if (BREAKPOINT > 0 && c != BREAKPOINT) {
-        c++;
+      if (BREAKPOINT > 0 && s.id != BREAKPOINT) {
         continue;
       }
-      logger.debug("Scenario " + c);
-      c++;
+      logger.debug("Scenario " + s.id);
 
       Dir botAction;
       try {
-        botAction = ai.act(s.state);
+        botAction = new ValueBot().act(s.state);
       } catch (Exception e) {
         e.printStackTrace();
         botAction = null;
@@ -67,7 +61,11 @@ public class BotTester {
       }
     }
 
-    logger.info(successCount + "/" + scenarios.size() + " were successful.");
+    if (BREAKPOINT > 0) {
+      logger.info(successCount > 0 ? "SUCCESS!" : "Failed.");
+    } else {
+      logger.info(successCount + "/" + scenarios.size() + " were successful.");
+    }
   }
 
   public static void main(String[] args) {

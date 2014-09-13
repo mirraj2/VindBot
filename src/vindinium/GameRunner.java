@@ -6,7 +6,7 @@ import java.io.File;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import vindinium.bot.AI;
-import vindinium.bot.StrategyBot;
+import vindinium.bot.ValueBot;
 import vindinium.model.Dir;
 import vindinium.model.GameState;
 import com.google.common.base.Stopwatch;
@@ -15,7 +15,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class GameRunner {
 
-  private static final String KEY = "4303bqe3";
+  private static final String KEY = "REDACTED";
   private static final boolean TRAINING = false;
   private static final String baseURL = "http://vindinium.org/api/" + (TRAINING ? "training" : "arena");
 
@@ -24,7 +24,7 @@ public class GameRunner {
   private boolean writeToFile = true;
 
   public static void main(String[] args) throws Exception {
-    new GameRunner(new StrategyBot());
+    new GameRunner(new ValueBot());
   }
 
   public GameRunner(AI ai) {
