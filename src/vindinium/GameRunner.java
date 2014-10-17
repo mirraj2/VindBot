@@ -15,7 +15,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class GameRunner {
 
-  private static final String KEY = "REDACTED";
+  private static final String KEY = "4303bqe3";
   private static final boolean TRAINING = false;
   private static final String baseURL = "http://vindinium.org/api/" + (TRAINING ? "training" : "arena");
 
